@@ -1,0 +1,26 @@
+# Credenciales — NUNCA versionar
+.env
+*.env
+
+# Base de datos de operaciones
+data/
+*.db
+*.db-shm
+*.db-wal
+
+# Node
+node_modules/
+npm-debug.log*
+
+# Logs
+logs/
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp

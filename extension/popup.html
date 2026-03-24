@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>CS2 Float Sniper v2</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { width:310px; background:#0d1117; color:#e6edf3; font-family:'Courier New',monospace; padding:16px; }
+    .header { display:flex; align-items:center; gap:10px; margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid #21262d; }
+    .dot { width:10px;height:10px;border-radius:50%;background:#00e676;box-shadow:0 0 8px #00e676;flex-shrink:0; }
+    .dot.off { background:#ef5350;box-shadow:0 0 8px #ef5350; }
+    h1 { font-size:13px;color:#4fc3f7;letter-spacing:1px; }
+    h2 { font-size:10px;color:#8b949e;font-weight:normal;margin-top:2px; }
+    .section { margin-bottom:14px; }
+    label { display:block;font-size:10px;color:#8b949e;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px; }
+    .perfil-btns { display:flex;gap:8px; }
+    .perfil-btn { flex:1;padding:8px 6px;border:1px solid #21262d;background:#161b22;color:#8b949e;border-radius:6px;cursor:pointer;font-family:'Courier New',monospace;font-size:11px;text-align:center;transition:all 0.15s; }
+    .perfil-btn:hover { border-color:#4fc3f7;color:#4fc3f7; }
+    .perfil-btn.active { border-color:#00e676;color:#00e676;background:rgba(0,230,118,0.08); }
+    .perfil-btn .sub { display:block;font-size:9px;color:#8b949e;margin-top:2px; }
+    .perfil-btn.active .sub { color:rgba(0,230,118,0.7); }
+    .toggle-row { display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:#161b22;border:1px solid #21262d;border-radius:6px; }
+    .toggle-label { font-size:12px;color:#e6edf3; }
+    .toggle { position:relative;width:38px;height:20px; }
+    .toggle input { display:none; }
+    .slider { position:absolute;inset:0;background:#21262d;border-radius:20px;cursor:pointer;transition:background 0.2s; }
+    .slider::before { content:'';position:absolute;width:14px;height:14px;left:3px;top:3px;background:#8b949e;border-radius:50%;transition:all 0.2s; }
+    input:checked + .slider { background:rgba(0,230,118,0.3); }
+    input:checked + .slider::before { transform:translateX(18px);background:#00e676; }
+    .input-row { display:flex;align-items:center;gap:8px;background:#161b22;border:1px solid #21262d;border-radius:6px;padding:8px 12px;margin-bottom:6px; }
+    .input-row span { font-size:11px;color:#8b949e;flex-shrink:0;min-width:90px; }
+    .field-input { flex:1;background:transparent;border:none;border-bottom:1px solid #30363d;color:#00e676;font-family:'Courier New',monospace;font-size:13px;font-weight:bold;text-align:right;outline:none;padding:2px 4px; }
+    .field-input:focus { border-bottom-color:#4fc3f7; }
+    .save-btn { background:rgba(0,230,118,0.1);border:1px solid #00e676;color:#00e676;border-radius:4px;padding:4px 10px;font-family:'Courier New',monospace;font-size:10px;cursor:pointer;transition:all 0.15s;width:100%;margin-top:4px; }
+    .save-btn:hover { background:rgba(0,230,118,0.25); }
+    .info-box { background:#161b22;border:1px solid #21262d;border-radius:6px;padding:10px;font-size:10px;color:#8b949e;line-height:1.9; }
+    .info-box .val { color:#00e676;font-weight:bold; }
+    .info-box .speed { color:#ffca28; }
+    .status-badge { display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:bold;letter-spacing:1px; }
+    .status-badge.on  { background:rgba(0,230,118,0.15);color:#00e676; }
+    .status-badge.off { background:rgba(239,83,80,0.15);color:#ef5350; }
+    .saved-msg { font-size:9px;color:#00e676;opacity:0;transition:opacity 0.3s;margin-left:6px; }
+    .saved-msg.show { opacity:1; }
+    .section-title { font-size:10px;color:#8b949e;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between; }
+    .footer { margin-top:12px;padding-top:10px;border-top:1px solid #21262d;font-size:9px;color:#3d444d;text-align:center;letter-spacing:1px; }
+    .stats-box { background:#0f1923;border:1px solid #1c2730;border-radius:6px;padding:8px 10px;font-size:9px;color:#8b949e;line-height:1.8; }
+    .spread-pill { display:inline-block;padding:1px 6px;border-radius:10px;font-size:10px;font-weight:bold;background:rgba(0,230,118,0.15);color:#00e676; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="dot" id="statusDot"></div>
+    <div>
+      <h1>CS2 FLOAT SNIPER v2</h1>
+      <h2>Arbitrage CSFloat ↔ Steam Market</h2>
+    </div>
+  </div>
+
+  <!-- Toggle ON/OFF -->
+  <div class="section">
+    <div class="toggle-row">
+      <span class="toggle-label">Sniper &nbsp;<span class="status-badge on" id="statusBadge">ACTIVO</span></span>
+      <label class="toggle"><input type="checkbox" id="toggleActivo" checked><span class="slider"></span></label>
+    </div>
+  </div>
+
+  <!-- Perfil -->
+  <div class="section">
+    <label>Perfil base</label>
+    <div class="perfil-btns">
+      <button class="perfil-btn active" data-perfil="1">Black Lotus FT<span class="sub">float &lt; 0.20 | &lt;$8</span></button>
+      <button class="perfil-btn" data-perfil="2">Redline FT<span class="sub">float &lt; 0.38 | &lt;$36</span></button>
+    </div>
+  </div>
+
+  <!-- Parámetros -->
+  <div class="section">
+    <div class="section-title">
+      Parámetros
+      <span class="saved-msg" id="savedMsg">✓ guardado</span>
+    </div>
+    <div class="input-row">
+      <span>Float máx.</span>
+      <input type="number" class="field-input" id="maxFloatInput" step="0.001" min="0.001" max="1.000" value="0.200">
+    </div>
+    <div class="input-row">
+      <span>Compra máx. $</span>
+      <input type="number" class="field-input" id="maxPriceInput" step="0.01" min="0.01" value="8.00">
+    </div>
+    <div class="input-row">
+      <span>Venta min. $</span>
+      <input type="number" class="field-input" id="minVentaInput" step="0.01" min="0.01" value="9.00">
+    </div>
+    <button class="save-btn" id="saveBtn">💾 Guardar y aplicar</button>
+  </div>
+
+  <!-- Estado activo -->
+  <div class="section">
+    <label>Estado</label>
+    <div class="info-box">
+      Perfil: <span id="infoNombre">Black Lotus FT</span><br>
+      Float máx: <span class="val" id="infoFloat">0.2000</span><br>
+      Compra máx: <span class="val" id="infoPrecio">$8.00</span><br>
+      Spread est: <span id="infoSpread" class="val">—</span><br>
+      Velocidad: <span class="speed">5-10s OK / 15-75s fallo</span>
+    </div>
+  </div>
+
+  <!-- Stats de sesión -->
+  <div class="section">
+    <label>Estadísticas</label>
+    <div class="stats-box" id="statsBox">Sin datos aún</div>
+  </div>
+
+  <div class="footer">AUTO-INYECTADO EN STEAM MARKET · v2.0 ARBITRAGE</div>
+  <script src="popup.js"></script>
+</body>
+</html>
