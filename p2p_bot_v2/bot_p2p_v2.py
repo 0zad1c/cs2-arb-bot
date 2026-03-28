@@ -22,8 +22,6 @@ from collections import deque
 from threading import Thread
 from dataclasses import dataclass, field
 import statistics
-import tkinter as tk
-from tkinter import ttk, messagebox
 from typing import Optional
 
 import aiohttp
@@ -315,6 +313,7 @@ async def analyze(
     buys: list,
     sells: list,
     selected_bank: str,
+    ui_queue: Optional[asyncio.Queue] = None,
 ) -> None:
     """Analiza oportunidades de arbitraje entre compradores y vendedores."""
     global _last_alert_time, _last_alert_spread
@@ -403,7 +402,10 @@ async def analyze(
 # ==========================================
 # 🔁 LOOP PRINCIPAL
 # ==========================================
-async def main(stop_event: asyncio.Event) -> None:
+async def main(
+    stop_event: asyncio.Event,
+    ui_queue: Optional[asyncio.Queue] = None,
+) -> None:
     """Loop principal del bot. Se detiene cuando se activa stop_event."""
     logger.info(f"Bot iniciado. Config: {config}")
 
@@ -440,7 +442,7 @@ async def main(stop_event: asyncio.Event) -> None:
 
                 logger.debug(f"Anuncios parseados — Compra: {len(buys)}, Venta: {len(sells)}")
 
-                await analyze(session, buys, sells, selected_bank)
+                await analyze(session, buys, sells, selected_bank, ui_queue)
 
             except Exception as e:
                 logger.error(f"Error en el loop principal: {type(e).__name__}: {e}")
