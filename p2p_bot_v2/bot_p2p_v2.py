@@ -30,8 +30,12 @@ import aiohttp
 from aiohttp import ClientTimeout, ClientResponseError, ClientConnectorError
 from loguru import logger
 
-# ── Importar configuración segura ─────────────────────────────────────────────
+# ── Importar configuración segura y base de datos ─────────────────────────────
 from config import config
+from database import P2PDatabase
+
+# Instancia global de la base de datos
+db = P2PDatabase()
 
 # ── Logging con rotación ──────────────────────────────────────────────────────
 logger.add("logs/bot_p2p_{time}.log", rotation="10 MB", retention="7 days", level="DEBUG")
@@ -358,6 +362,13 @@ async def analyze(
     if spread_percent < dynamic_target:
         return
 
+    # ── Registro de oportunidad en Base de Datos ─────────────────────────────
+    try:
+        db.insert_record(config.asset, config.fiat, best_buy['price'], spread_percent)
+    except Exception as e:
+        logger.error(f"Error al persistir oportunidad en DB: {e}")
+
+
     # ── Anti-spam mejorado: por valor Y por tiempo ────────────────────────────
     current_time = time.monotonic()
     current_spread_rounded = round(spread_percent, 2)
@@ -396,7 +407,20 @@ async def main(stop_event: asyncio.Event) -> None:
     """Loop principal del bot. Se detiene cuando se activa stop_event."""
     logger.info(f"Bot iniciado. Config: {config}")
 
+    # ── Inicializar historial desde DB ────────────────────────────────────────
+    try:
+        last_records = db.get_last_records(50)
+        for rec in last_records:
+            # Estructura del registro: (timestamp, asset, fiat, price, spread)
+            # El spread es el último elemento (índice 4)
+            market_history.append(rec[4])
+        if last_records:
+            logger.info(f"Historial inicializado con {len(last_records)} registros de la DB.")
+    except Exception as e:
+        logger.warning(f"No se pudo cargar el historial de la DB: {e}")
+
     # Crear sesión con connection pooling
+
     connector = aiohttp.TCPConnector(limit=10, ttl_dns_cache=300)
     timeout = ClientTimeout(total=30)
 
