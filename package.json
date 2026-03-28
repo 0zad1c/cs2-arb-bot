@@ -7,7 +7,8 @@
   "scripts": {
     "start": "node src/bot.js",
     "dev": "node --watch src/bot.js",
-    "logs": "node src/tools/showLogs.js"
+    "logs": "node src/tools/showLogs.js",
+    "ai": "node src/tools/aiWorker.js"
   },
   "engines": {
     "node": ">=20.0.0"
